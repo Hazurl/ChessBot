@@ -22,7 +22,7 @@ function get_rating(perfs, category) {
     const infos = perfs[category[1]];
     if (typeof infos == "undefined")
         return "Unranked";
-    return infos['rating'];
+    return infos['rating'] + ((typeof infos['prov'] == "undefined") ? '' : '?');
 }
 
 function request(link, on_data, on_error) {
