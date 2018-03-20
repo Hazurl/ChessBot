@@ -3,16 +3,19 @@ const https = require('https');
 
 const request = require('../util/request.js');
 
-const categories = [
+const categories_classical = [
     ["Bullet", "bullet"],
     ["Classical", "classical"],
     ["Blitz", "blitz"],
+    ["Rapid", "rapid"],
+    ["Ultra bullet", "ultraBullet"],
+    ["Correspondence", "correspondence"]
+];
+
+const categories_variants = [
     ["King of the hill", "kingOfTheHill"],
     ["Puzzle", "puzzle"],
     ["Crazy House", "crazyhouse"],
-    ["Rapid", "rapid"],
-    ["Ultra bullet", "ultraBullet"],
-    ["Correspondence", "correspondence"],
     ["Chess 960", "chess960"],
     ["Atomic", "atomic"],
     ["Racing king", "racingKings"],
@@ -41,15 +44,24 @@ module.exports = {
         }
 
         request.user(args[0]).then((user) => {
-            var embed = new Discord.RichEmbed()
+            var embed_classical = new Discord.RichEmbed()
                 .setColor(0x00cc66)
-                .setTitle(`${user['username']}'s rating`);
+                .setTitle(`${user['username']}'s rating on classical`);
     
-            for(var category of categories)
-                embed.addField(category[0], get_rating(user['perfs'], category), true);
+            for(var category of categories_classical)
+                embed_classical.addField(category[0], get_rating(user['perfs'], category), true);
 
-            return msg.channel.send({ embed });
+            var embed_variant = new Discord.RichEmbed()
+                .setColor(0x00cc66)
+                .setTitle(`${user['username']}'s rating on variants`);
+    
+            for(var category of categories_variants)
+                embed_variant.addField(category[0], get_rating(user['perfs'], category), true);
+
+            msg.channel.send({ embed: embed_classical });
+            return msg.channel.send({ embed: embed_variant });
         }).catch((err) => {
+            console.log(err);
             return msg.channel.send({ embed: {
                 color: 0xd70000,
                 title: "Player not found in lichess's database",
