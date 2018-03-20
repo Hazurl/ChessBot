@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const https = require('https');
 
+const request = require('../util/request.js');
+
 const categories = [
     ["Bullet", "bullet"],
     ["Classical", "classical"],
@@ -25,26 +27,6 @@ function get_rating(perfs, category) {
     return infos['rating'] + ((typeof infos['prov'] == "undefined") ? '' : '?');
 }
 
-function request(link) {
-    return new Promise((res, rep) => {
-        https.get(link, resp => {
-            if (resp.statusCode != 200) {
-                return rep({ status_code: resp.statusCode });
-            }
-            var data = '';
-            resp.on('data', chunk => data += chunk )
-            return resp.on('end', () => res(JSON.parse(data)) );
-        }).on('error', err => {
-            return rep(err);
-        });
-    });
-}
-
-function request_user(username) {
-    console.log(`:: request_user '${username}'`);
-    return request(`https://lichess.org/api/user/${username}`);
-}
-
 module.exports = {
     name: "rating",
     description: "Search for rating of a user in the Lichess's database",
@@ -58,7 +40,7 @@ module.exports = {
             }});
         }
 
-        request_user(args[0]).then((user) => {
+        request.user(args[0]).then((user) => {
             var embed = new Discord.RichEmbed()
                 .setColor(0x00cc66)
                 .setTitle(`${user['username']}'s rating`);
