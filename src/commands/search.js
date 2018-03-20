@@ -71,9 +71,6 @@ module.exports = {
                 .setColor(0xccff33)
                 .setTitle(`Player ${status[0]['name']} found`)
                 .setDescription(desc);
-    /*
-                for(var category of categories)
-                    embed.addField(category[0], get_rating(json['perfs'], category), true);*/
 
             return msg.channel.send({ embed });
         }, (err) => {
