@@ -56,6 +56,7 @@ commands['help'] = {
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    client.user.setActivity('$help  |  v0.2', { type: 'PLAYING' }).then(() => {}).catch((err) => console.log(err));
 });
 
 client.on('message', msg => {

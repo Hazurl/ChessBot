@@ -2,3 +2,4 @@
 res/token\.json
 
 node_modules/
+temp/

@@ -1,11 +1,14 @@
 {
-    "name":"chess-bot",
-    "description":"Discord bot using the lichess's api",
-    "version":"0.1.0",
+    "name": "chess-bot",
+    "description": "Discord bot using the lichess's api",
+    "version": "0.2.0",
     "scripts": {
-        "start":"node src/index.js"
+        "start": "node src/index.js"
     },
     "dependencies": {
-        "discord.js":"11.3.2"
+        "chess.js": "^0.10.2",
+        "chesslib": "^0.9.10",
+        "discord.js": "11.3.2",
+        "gm": "^1.23.1"
     }
 }
