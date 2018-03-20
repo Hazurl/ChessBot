@@ -139,4 +139,5 @@ client.on('message', msg => {
 
 });
 
+console.log("Connecting...");
 client.login(token);
