@@ -25,22 +25,24 @@ function get_rating(perfs, category) {
     return infos['rating'] + ((typeof infos['prov'] == "undefined") ? '' : '?');
 }
 
-function request(link, on_data, on_error) {
-    https.get(link, resp => {
-        if (resp.statusCode != 200) {
-            return on_error({ status_code: resp.statusCode });
-        }
-        var data = '';
-        resp.on('data', chunk => data += chunk )
-        return resp.on('end', () => on_data(JSON.parse(data)) );
-    }).on('error', err => {
-        return on_error(err);
+function request(link) {
+    return new Promise((res, rep) => {
+        https.get(link, resp => {
+            if (resp.statusCode != 200) {
+                return rep({ status_code: resp.statusCode });
+            }
+            var data = '';
+            resp.on('data', chunk => data += chunk )
+            return resp.on('end', () => res(JSON.parse(data)) );
+        }).on('error', err => {
+            return rep(err);
+        });
     });
 }
 
 function request_user(username, on_data, on_error) {
     console.log(":: request_user");
-    return request(`https://lichess.org/api/user/${username}`, on_data, on_error);
+    return request(`https://lichess.org/api/user/${username}`).then(on_data).catch(on_error);
 }
 
 module.exports = {
