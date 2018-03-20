@@ -120,7 +120,6 @@ commands['help'] = {
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    get_channel("general").send("Starting bot...");
 });
 
 client.on('message', msg => {
