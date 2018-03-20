@@ -40,9 +40,9 @@ function request(link) {
     });
 }
 
-function request_user(username, on_data, on_error) {
-    console.log(":: request_user");
-    return request(`https://lichess.org/api/user/${username}`).then(on_data).catch(on_error);
+function request_user(username) {
+    console.log(`:: request_user '${username}'`);
+    return request(`https://lichess.org/api/user/${username}`);
 }
 
 module.exports = {
@@ -58,16 +58,16 @@ module.exports = {
             }});
         }
 
-        request_user(args[0], (user) => {
+        request_user(args[0]).then((user) => {
             var embed = new Discord.RichEmbed()
                 .setColor(0x00cc66)
                 .setTitle(`${user['username']}'s rating`);
     
-                for(var category of categories)
-                    embed.addField(category[0], get_rating(user['perfs'], category), true);
+            for(var category of categories)
+                embed.addField(category[0], get_rating(user['perfs'], category), true);
 
             return msg.channel.send({ embed });
-        }, (err) => {
+        }).catch((err) => {
             return msg.channel.send({ embed: {
                 color: 0xd70000,
                 title: "Player not found in lichess's database",
