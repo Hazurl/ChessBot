@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const client = new Discord.Client();
 const prefix = '$'; 
-const token = require('../res/token.json')["token"];
+const token = process.env.CHESS_BOT_TOKEN;//require('../res/token.json')["token"];
 var commands = {};
 
 const commands_folder = __dirname + '/commands/';
