@@ -141,7 +141,7 @@ client.on('message', msg => {
 
 console.log("Connecting...");
 client.login(token).then((token) => {
-    console.log(':: client.login success: ', token);
+    console.log(':: client.login success');
 }).catch((err) => {
     console.log(':: client.login failed: ', err);
 });
