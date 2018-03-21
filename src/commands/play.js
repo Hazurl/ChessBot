@@ -5,6 +5,8 @@ const Discord = require('discord.js');
 var Chess = require('chess.js').Chess;
 
 module.exports = {
+    hide: true,
+
     name: "play",
     description: "Upload an image of the current game's state, it use the algebric notation",
     format: "play <notation-list>",

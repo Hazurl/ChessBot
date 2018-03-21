@@ -9,7 +9,8 @@ var commands = {};
 const commands_folder = __dirname + '/commands/';
 fs.readdirSync(commands_folder).forEach(file => {
     var command = require(commands_folder + '/' + file);
-    commands[command.name] = command;
+    if (!command.hide)
+        commands[command.name] = command;
 });
 
 function get_channel(name) {
