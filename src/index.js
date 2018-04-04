@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 
 const client = new Discord.Client();
-const prefix = '$'; 
+const prefix = '%'; 
 const token = process.env.CHESS_BOT_TOKEN;//require('../res/token.json')["token"];
 var commands = {};
 
@@ -57,7 +57,7 @@ commands['help'] = {
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity('$help  |  v0.2', { type: 'PLAYING' }).then(() => {}).catch((err) => console.log(err));
+    client.user.setActivity(prefix + 'help  |  v0.2', { type: 'PLAYING' }).then(() => {}).catch((err) => console.log(err));
 });
 
 client.on('message', msg => {
