@@ -51,10 +51,7 @@ function register_user(command, discord, lichess, table) {
         return table.insert([[discord, lichess]])
         .then(m);
     })
-    .catch((err) => {
-        command.send_error("Database Error", `Sorry we couldn't link your accounts`);            
-        Log.error(1, "Database >>", err);
-    });
+    .catch((err) => {});
 }
 
 var register = new Command(["register"])
