@@ -1,6 +1,6 @@
 var gm = require('gm');
 var fs = require('fs');
-var log = require('../util/Logger.js');
+var Log = require('../util/Logger.js');
 var req = require('request');
 
 var Command = require('../util/Command').Command;
@@ -18,7 +18,7 @@ var play = new Command(["play"])
         return play.send_error("Not enough arguments", "play require a list of positions");        
 
     var body = args.join(' ');
-    log.detail(1, "Generate Image for: '" + body + "'");
+    Log.detail(1, "Generate Image for: '" + body + "'");
 
     req.post({url:'http://chessimg.tppt.eu/image', form: {moves:body}}, function(err, rep, body) {
         body = JSON.parse(body);
@@ -27,13 +27,13 @@ var play = new Command(["play"])
             return play.send_error("Image Generator error", "Sorry an internal error occurs");
 
         if (rep.statusCode == 200) {
-            log.important(1, "Chess Img API >> GET " + body.file);
+            Log.important(1, "Chess Img API >> GET " + body.file);
             return play.send_files([
                 body.file
             ]);
         }
         
-        log.warning(1, "Chess Img API >> Status " + rep.statusCode);
+        Log.warning(1, "Chess Img API >> Status " + rep.statusCode);
         switch(body.status) {
             case 500: // bad move
                 return play.send_error("Move Invalid", `'${body.move}' is invalid or unrecognized`);

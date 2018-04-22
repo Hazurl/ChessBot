@@ -3,7 +3,6 @@ const https = require('https');
 
 const Command = require("../util/Command").Command;
 const request = require('../util/request.js');
-const log = require('../util/Logger.js');
 
 function request_user_and_status(username, on_data, on_error) {
     return Promise.all([request.status(username), request.user(username)]);

@@ -1,4 +1,4 @@
-const log = require('./Logger.js');
+const Log = require('./Logger.js');
 const Embed = require('discord.js').RichEmbed;
 
 function cut(txt, n) {
@@ -29,7 +29,7 @@ class Command {
     } 
     
     execute(msg, args, db, app_info) {
-        log.detail(1, "Execution...");
+        Log.detail(1, "Execution...");
         this.current_execution = {
             msg, args, db, app_info
         };
@@ -60,8 +60,8 @@ class Command {
         title = title || "Unknown error";
         description = description || "Sorry, an internal error occurs";
 
-        var txt_log = cut(`${title}: ${description}`, 80); 
-        log.warning(1, `Send Embed >> ${replace_nl(txt_log)}`);
+        var txt_Log = cut(`${title}: ${description}`, 80); 
+        Log.warning(1, `Send Embed >> ${replace_nl(txt_Log)}`);
 
         return this.current_execution.msg.channel.send({ embed: {
             color: 0xff0000,
@@ -71,8 +71,8 @@ class Command {
     }
 
     send_response(title, description, fields) {
-        var txt_log = cut(`${title}: ${description}`, 80); 
-        log.info(1, `Send Embed >> ${replace_nl(txt_log)}`);
+        var txt_Log = cut(`${title}: ${description}`, 80); 
+        Log.info(1, `Send Embed >> ${replace_nl(txt_Log)}`);
 
         var e = new Embed()
             .setColor(0x3399ff)
@@ -89,13 +89,13 @@ class Command {
     }
 
     send_message(txt) {
-        var txt_log = cut(txt, 80); 
-        log.info(1, `Send >> ${replace_nl(txt_log)}`);
+        var txt_Log = cut(txt, 80); 
+        Log.info(1, `Send >> ${replace_nl(txt_Log)}`);
         return this.current_execution.msg.channel.send(txt);
     }
 
     send_files(files) {
-        log.info(1, `Send Files >> ${replace_nl(cut(files.join(', '), 80))}`);
+        Log.info(1, `Send Files >> ${replace_nl(cut(files.join(', '), 80))}`);
         this.current_execution.msg.channel.send({ files });
     }
 
