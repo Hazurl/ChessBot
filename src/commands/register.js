@@ -14,7 +14,7 @@ function register_user(command, discord, lichess, table) {
             .then(res)
             .catch((err) => { 
                 command.send_error("Player not found in lichess's database", "Did you mistype ?");
-                rej(err); 
+                rej(); 
             })
         ), new Promise((res, rej) => // Create table -> lichess account unique -> discord user exists
             table.ensure_exists()
