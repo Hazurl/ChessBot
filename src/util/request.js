@@ -1,8 +1,9 @@
 const https = require('https');
+const log = require("./Logger.js");
 
 module.exports = {
     request: (link) => {
-        console.log(`:: request to '${link}'`);
+        log.important(2, `Lichess >> ${link}`);
         return new Promise((res, rep) => {
             https.get(link, resp => {
                 if (resp.statusCode != 200) {
@@ -22,12 +23,12 @@ module.exports = {
     },
 
     user: (username) => {
-        console.log(`:: request user '${username}'`);
+        log.detail(2, `Lichess >> User ${username}`);
         return module.exports.lichess(`user/${username}`);
     },
 
     status: (username) => {
-        console.log(`:: request status '${username}'`);
+        log.detail(2, `Lichess >> Status of ${username}`);
         return module.exports.lichess(`users/status?ids=${username}`);
     }
 };

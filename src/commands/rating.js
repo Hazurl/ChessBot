@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const https = require('https');
 
+const Command = require("../util/Command").Command;
 const request = require('../util/request.js');
 
 const categories_classical = [
@@ -30,43 +31,29 @@ function get_rating(perfs, category) {
     return infos['rating'] + ((typeof infos['prov'] == "undefined") ? '' : '?');
 }
 
-module.exports = {
-    name: "rating",
-    description: "Search for rating of a user in the Lichess's database",
-    format: "rating <username>",
-    execution: (msg, args) => {
-        if (args.length < 1) {
-            return msg.channel.send({ embed: {
-                color: 0xd70000,
-                title: "Not Enough arguments",
-                description: "rating require a username in parameter"
-            }});
-        }
+var rating = new Command(["rating", "r"])
+.set_description("Search rating of a user in the Lichess's database")
+.set_formats(["rating <username>", "r <username>"])
+.set_examples(["r Hazurl"])
+.on_execution((msg, args) => {
+    if (args.length < 1)
+        return rating.send_error("Not enough arguments", "rating require a username in parameter");
 
-        request.user(args[0]).then((user) => {
-            var embed_classical = new Discord.RichEmbed()
-                .setColor(0x00cc66)
-                .setTitle(`${user['username']}'s rating on classical`);
-    
-            for(var category of categories_classical)
-                embed_classical.addField(category[0], get_rating(user['perfs'], category), true);
+    request.user(args[0]).then((user) => {
+        var fclassical = [];
+        var fvariant = [];
 
-            var embed_variant = new Discord.RichEmbed()
-                .setColor(0x00cc66)
-                .setTitle(`${user['username']}'s rating on variants`);
-    
-            for(var category of categories_variants)
-                embed_variant.addField(category[0], get_rating(user['perfs'], category), true);
+        for(var category of categories_classical)
+            fclassical.push([category[0], get_rating(user['perfs'], category), true]);
 
-            msg.channel.send({ embed: embed_classical });
-            return msg.channel.send({ embed: embed_variant });
-        }).catch((err) => {
-            console.log(err);
-            return msg.channel.send({ embed: {
-                color: 0xd70000,
-                title: "Player not found in lichess's database",
-                description: "Did you mistype ?"
-            }});
-        });
-    }
-}
+        for(var category of categories_variants)
+            fvariant.push([category[0], get_rating(user['perfs'], category), true]);
+
+        rating.send_response(`${user['username']}'s rating on classical`, '', fclassical);
+        rating.send_response(`${user['username']}'s rating on variants`, '', fvariant);
+    }).catch((err) => {
+        return rating.send_error("Player not found in lichess's database", "Did you mistype ?");
+    });
+});
+
+module.exports = rating;

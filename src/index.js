@@ -1,63 +1,44 @@
+// External modules
 const Discord = require('discord.js');
 const fs = require('fs');
 
-const client = new Discord.Client();
+// Internal modules
+const DB = require("./util/DB.js").DB;
+const Command = require("./util/Command.js").Command;
+const log = require("./util/Logger.js");
+const bot = require("./bot/bot.js").bot;
+const db = require("./bot/database.js").database;
+
+// Discord, BDD
+const client = bot.get_client();
+const _db = new DB(process.env.CHESS_BOT_DB);
+bot.db = _db;
+
+/*
 const prefix = '%'; 
-const token = process.env.CHESS_BOT_TOKEN;//require('../res/token.json')["token"];
-var commands = {};
+var commands = [];
+const enable_dev_mode = typeof process.env.CHESS_BOT_DEV_MODE != "undefined";
+*/
 
 const commands_folder = __dirname + '/commands/';
 fs.readdirSync(commands_folder).forEach(file => {
     var command = require(commands_folder + '/' + file);
-    if (!command.hide)
-        commands[command.name] = command;
+    if (bot.add_command(command))
+        log.detail(0, "Add Command " + command.names.join(", "));
 });
 
-function get_channel(name) {
-    return client.channels.filter((channel) => channel.name === name).first();
+/*
+function get_command(c) {
+    for(var i = 0; i < commands.length; ++i) {
+        if (commands[i].is(c) && (enable_dev_mode || !commands[i].hidden))
+            return commands[i];
+    }
+    return null;
 }
-
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-}
-
-commands['help'] = {
-    name: "help",
-    description: "Gives you command information",
-    format: "help\nhelp <command>",
-    execution: function(msg, args) {
-        if (args.length) {
-            const command = commands[args[0]];
-            if (typeof command == "undefined") {
-                var embed = new Discord.RichEmbed()
-                    .setColor(0xd70000)
-                    .setTitle("Unknown command")
-                    .setDescription(`Type ${prefix}help to get commands informations`);
-                return msg.channel.send({ embed });
-            }
-            var embed = new Discord.RichEmbed()
-                .setColor(0x3399ff)
-                .setTitle(`${command.name.capitalize()}`)
-                .setDescription(command.description)
-                .addField('Format', command.format);
-            return msg.channel.send({ embed });
-        }
-
-        var desc = '**Commands**\n```asciidoc\n';
-        for(var command_name in commands) {
-            if (!commands.hasOwnProperty(command_name)) continue;
-            const command = commands[command_name];
-            if ('description' in command)
-                desc += `${command.name.padEnd(10)}:: ${command.description}\n`
-        }
-
-        msg.channel.send(desc + '```');
-    }    
-};
 
 client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity(prefix + 'help  |  v0.2', { type: 'PLAYING' }).then(() => {}).catch((err) => console.log(err));
+    log.important(0, `Discord >> Logged in as ${client.user.tag}`);
+    client.user.setActivity(prefix + 'help  |  v0.2', { type: 'PLAYING' }).then(() => {}).catch((err) => log.err(0, err));
 });
 
 client.on('message', msg => {
@@ -65,10 +46,18 @@ client.on('message', msg => {
         return;
 
     const contents = msg.content.substr(1).split(' ');
+    log.info(0, `Received: ${contents.join(' ')}`);
 
-    if (contents.length && contents[0] in commands)
-        return commands[contents[0]].execution(msg, contents.slice(1));
+    if (contents.length >= 1) {
+        const command = get_command(contents[0]);
 
+        if (command !== null) {
+            log.info(1, "✓ Command found");
+            return command.execute(msg, contents.slice(1), db, app_info);
+        }
+    }
+
+    log.warning(1, "✘ Command not found");
     msg.channel.send({ embed: {
         color: 0xff0000,
         title: "Unknown command",
@@ -77,9 +66,10 @@ client.on('message', msg => {
 
 });
 
-console.log("Connecting...");
-client.login(token).then((token) => {
-    console.log(':: client.login success');
+log.info(0, `Discord >> Connecting to ${process.env.CHESS_BOT_TOKEN}`);
+client.login(process.env.CHESS_BOT_TOKEN).then((token) => {
+    log.important(0, "Discord >> Successfully connected");
 }).catch((err) => {
-    console.log(':: client.login failed: ', err);
+    log.error(0, "Discord >> Connection failed (" + err + ")");
 });
+*/

@@ -1,55 +1,49 @@
 var gm = require('gm');
 var fs = require('fs');
+var log = require('../util/Logger.js');
+var req = require('request');
+
+var Command = require('../util/Command').Command;
 
 const Discord = require('discord.js');
-var Chess = require('chess.js').Chess;
 
-module.exports = {
-    hide: true,
+var play = new Command(["play"])
+.set_description("Upload an image of the current game's state, it use the algebric notation")
+.set_examples(["play e4 e6 b3 d5 Bb2"])
+.set_formats(["play <algebric notation list...>"])
+.hide(true)
+.on_execution((msg, args) => {
 
-    name: "play",
-    description: "Upload an image of the current game's state, it use the algebric notation",
-    format: "play <notation-list>",
-    execution:(msg, args) => {
-        var chess = new Chess();
+    if (args.length <= 0)
+        return play.send_error("Not enough arguments", "play require a list of positions");        
 
-        console.log(chess.ascii());
+    var body = args.join(' ');
+    log.detail(1, "Generate Image for: '" + body + "'");
 
-        for(var i = 0; i < args.length; ++i) {
-            console.log('move ' + args[i]);
-            if (!chess.move(args[i])) {
-                return msg.channel.send({ embed: {
-                    color: 0xd70000,
-                    title: "Invalid Move",
-                    description: "The move '" + args[i] + "' is impossible or unrecognized"
-                }});
-            }
-        }
+    req.post({url:'http://chessimg.tppt.eu/image', form: {moves:body}}, function(err, rep, body) {
+        body = JSON.parse(body);
 
-        console.log(chess.ascii());
+        if (err)
+            return play.send_error("Image Generator error", "Sorry an internal error occurs");
 
-        var img = gm('img/chessboard.png') .resize(320, 320);
-        for(var x = 0; x < 8; ++x) {
-            for(var y = 0; y < 8; ++y) {
-                var p = chess.get(String.fromCharCode(97 + x) + (y+1));
-                if (p)
-                    img.draw('image', 'over', 40*x, 280-40*y, 40, 40, 
-                        `img/${p.type.toUpperCase()}${p.color.toUpperCase()}.png`);
-            }                
+        if (rep.statusCode == 200) {
+            log.important(1, "Chess Img API >> GET " + body.file);
+            return play.send_files([
+                body.file
+            ]);
         }
         
-        img.write('temp/output.png', (err) => {
-            if(err) {
-                console.log(err);
-                return msg.channel.send({ embed: {
-                    color: 0xd70000,
-                    title: "Technical issue",
-                    description: "Sorry I can't give you the image... try to imagine it ?"
-                }});
-            }
-            msg.channel.send({ files: [
-                'temp/output.png'
-            ]});
-        });
-    }
-}
+        log.warning(1, "Chess Img API >> Status " + rep.statusCode);
+        switch(body.status) {
+            case 500: // bad move
+                return play.send_error("Move Invalid", `'${body.move}' is invalid or unrecognized`);
+            case 600: // no arguments
+                return play.send_error("Not enough arguments", "play require a list of positions");
+            default:
+                return play.send_error("Image Generator error", "Sorry an internal error occurs");
+        }
+    });
+});
+
+
+module.exports = play;
