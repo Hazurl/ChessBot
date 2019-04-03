@@ -5,8 +5,12 @@ const db = require("../bot/database.js").database;
 var whois = new Command(["whois", "w"])
 .set_description("Search the discord/lichess account link to it")
 .set_formats(["whois <discord id>", "whois <discord tag>", "whois <lichess name>"])
-.set_examples(["whois Hazurl\t(Search discord account link to 'Hazurl')", "whois @Hazurl\t(Search lichess account link to 'Hazurl')"])
+.set_examples(["whois Hazurl\t(Search discord account linked to the lichess account 'Hazurl')", "whois @Hazurl\t(Search lichess account linked to 'Hazurl')"])
 .on_execution((msg, args) => {
+    if (args.length <= 0) {
+        return whois.send_error("Not enough arguments", "whois require a username in parameter");
+    }
+    
     const server = msg.guild;
     const table = db.get_register_table(server.id);
 

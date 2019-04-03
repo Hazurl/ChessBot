@@ -1,16 +1,15 @@
 const Discord = require('discord.js');
 const Command = require('./../util/Command.js').Command;
 const Log = require("./../util/Logger.js");
+const { dev_mode_enable, major_version, minor_version } = require("../util/Config.js");
 
 class Bot {
     constructor() {
         this.client = new Discord.Client();
-        const dev_mode = process.env.CHESS_BOT_DEV_MODE;
-        this.dev_mode_enable = typeof dev_mode != "undefined";
         this.commands = {};
         this.unique_commands = [];
 
-        Log.info(0, `Discord >> Connecting to ${this.is_dev_mode_enable() ? process.env.CHESS_BOT_TOKEN : '***'}`);
+        Log.info(0, `Discord >> Connecting to ${dev_mode_enable ? process.env.CHESS_BOT_TOKEN : '***'}`);
         this.client.login(process.env.CHESS_BOT_TOKEN).then((token) => {
             Log.important(0, "Discord >> Successfully connected");
         }).catch((err) => {
@@ -19,7 +18,7 @@ class Bot {
         
         this.client.on('ready', () => {
             Log.important(0, `Discord >> Logged in as ${this.client.user.tag}`);
-            this.client.user.setActivity(this.get_prefix() + 'help  |  v0.2', { type: 'PLAYING' })
+            this.client.user.setActivity(this.get_prefix() + 'help  |  v' + major_version + '.' + minor_version, { type: 'PLAYING' })
             .then(() => {}).catch((err) => Log.err(0, err));
         });
 
@@ -57,20 +56,22 @@ class Bot {
         return '%';
     }
 
-    is_dev_mode_enable() {
-        return this.dev_mode_enable;
-    }
-
     add_command(c) {
         let b = c instanceof Command;
         if (b) {
-            this.unique_commands.push(c);
-            for(var n of c.names) 
-                this.commands[n] = c;
+            if (!c.hidden) {
+                this.unique_commands.push(c);
+                for(var n of c.names) {
+                    this.commands[n] = c;
+                }
+                return true;
+            }
         }
-        else
+        else {
             Log.warning(0, "Trying to add command: ", typeof c, JSON.stringify(c));
-        return b;
+        }
+
+        return false;
     }
 
     get_command(name) {

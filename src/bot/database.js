@@ -2,6 +2,7 @@ const Client = require('pg').Client;
 
 const Log = require("./../util/Logger.js");
 const bot = require("./bot.js").bot;
+const { dev_mode_enable } = require("../util/Config.js");
 
 class RegisterTable {
     constructor(name, db) {
@@ -77,7 +78,7 @@ class RegisterTable {
 class Database {
     constructor() {
         const connectionString = process.env.CHESS_BOT_DB;
-        Log.info(0, `Database >> Connecting to ${bot.is_dev_mode_enable() ? connectionString : '***'}`);
+        Log.info(0, `Database >> Connecting to ${dev_mode_enable ? connectionString : '***'}`);
         this.client = new Client({ connectionString });
         this.client.connect()
             .then (()    => Log.important(0, "Database >> Successfully connected"))

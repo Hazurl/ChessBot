@@ -11,7 +11,6 @@ var board = new Command(["board"])
 .set_description("Upload an image of the current game's state, it use the algebric notation")
 .set_examples(["board e4 e6 b3 d5 Bb2"])
 .set_formats(["board <algebric notation list...>"])
-.hide(true)
 .on_execution((msg, args) => {
     var body = args.join(' ');
     Log.detail(1, "Generate Image for: '" + body + "'");

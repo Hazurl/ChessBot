@@ -3,7 +3,6 @@ const Discord = require('discord.js');
 const fs = require('fs');
 
 // Internal modules
-const Command = require("./util/Command.js").Command;
 const Log = require("./util/Logger.js");
 const bot = require("./bot/bot.js").bot;
 const db = require("./bot/database.js").database;
@@ -15,6 +14,7 @@ bot.db = db;
 const commands_folder = __dirname + '/commands/';
 fs.readdirSync(commands_folder).forEach(file => {
     var command = require(commands_folder + '/' + file);
-    if (bot.add_command(command))
+    if (bot.add_command(command)) {
         Log.detail(0, "Add Command " + command.names.join(", "));
+    }
 });

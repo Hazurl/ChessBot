@@ -1,11 +1,16 @@
 const cli = require("cli-color");
+const { console_color_enable } = require("../util/Config.js");
+
+function if_color_enable(f) {
+    return console_color_enable ? f : (t) => t;
+}
 
 function formatted_time() {
     const t = new Date();
     const h = t.getHours().toString().padStart(2, '0');
     const m = t.getMinutes().toString().padStart(2, '0');
     const s = t.getSeconds().toString().padStart(2, '0');
-    return cli.blackBright(`[${h}:${m}:${s}]`);
+    return if_color_enable(cli.blackBright)(`[${h}:${m}:${s}]`);
 }
 
 function prefix(indent) {
@@ -21,9 +26,9 @@ function make_logger(l) {
 }
 
 module.exports = {
-    detail :    make_logger(cli.white),
-    info :      make_logger(cli.green),
-    important : make_logger(cli.bold.blue),
-    warning :   make_logger(cli.bold.yellowBright),
-    error :     make_logger(cli.bold.red),
+    detail :    make_logger(if_color_enable(cli.white)),
+    info :      make_logger(if_color_enable(cli.green)),
+    important : make_logger(if_color_enable(cli.bold.blue)),
+    warning :   make_logger(if_color_enable(cli.bold.yellowBright)),
+    error :     make_logger(if_color_enable(cli.bold.red)),
 };
