@@ -21,18 +21,17 @@ var search = new Command(["search", "s"])
         const status = req[0][0];
         var desc = `Lichess account : **[${status["name"]}](${user["url"]})**\n`;
         if (status['online']) {
-            if (status['playing']) {
-                desc += `[Playing...](${user['playing']})`
-            } else
+            if (status['playing'])
+                desc += `[Playing...](${user['playing']})`;
+            else
                 desc += `Online`;
         }
-        var embed = new Discord.RichEmbed()
-            .setColor(0xccff33)
-            .setTitle(`Player ${status['name']} found`)
-            .setDescription(desc);
-        search.send_response(`Player ${status['name']} found`, desc);
+        if (user['closed'])
+            search.send_error(`Player ${status['name']} found`, 'Closed account');
+        else
+            search.send_response(`Player ${status['name']} found`, desc);
     }).catch((err) => {
-        search.send_error("Player not found in lichess's database", "Did you mistype ?");
+        search.send_error("Player not found in lichess's database", "Did you mistype?");
     });
 });
 
