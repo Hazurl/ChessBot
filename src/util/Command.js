@@ -70,12 +70,16 @@ class Command {
         }});
     }
 
-    send_response(title, description, fields) {
+    send_warning(title, description, fields) {
+        return this.send_response(title, description, fields, 0xffa500);
+    }
+
+    send_response(title, description, fields, hex) {
         var txt_Log = cut(`${title}: ${description}`, 80); 
         Log.info(1, `Send Embed >> ${replace_nl(txt_Log)}`);
 
         var e = new Embed()
-            .setColor(0x3399ff)
+            .setColor(hex || 0x3399ff)
             .setTitle(title)
             .setDescription(description);
 
