@@ -19,17 +19,17 @@ var search = new Command(["search", "s"])
     request_user_and_status(args[0]).then((req) => {
         const user = req[1];
         const status = req[0][0];
-        var desc = `Lichess account : **[${status["name"]}](${user["url"]})**\n`;
+        var desc = `Lichess account : **[${status["name"]}](${user["url"]})**`;
         if (status['online']) {
             if (status['playing'])
-                desc += `[Playing...](${user['playing']})`;
+                desc += `\n[Playing...](${user['playing']})`;
             else
-                desc += `Online`;
+                desc += `\nOnline`;
         }
         if (user['closed'])
             search.send_error(`Player ${status['name']} found`, 'Closed account');
         else if (user['engine'])
-            search.send_warning(`Playing ${status['name']} found`, `${desc}This player is flagged for using computer assistance`);
+            search.send_warning(`Playing ${status['name']} found`, `${desc}\nThis player is flagged for using computer assistance`);
         else
             search.send_response(`Player ${status['name']} found`, desc);
     }).catch((err) => {
