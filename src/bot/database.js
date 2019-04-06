@@ -4,6 +4,47 @@ const Log = require("./../util/Logger.js");
 const bot = require("./bot.js").bot;
 const { dev_mode_enable } = require("../util/Config.js");
 
+class ServersTable {
+    constructor(db) {
+        this.name = "servers";
+        this.db = db;
+    }
+
+    ensure_exists() {
+        return this.db.ensure_table_exists(this.name, [
+            "server_id BIGINT UNIQUE",
+            "role_info TEXT",
+            "PRIMARY KEY(server_id)",
+            "UNIQUE(server_id)"
+        ]);
+    }
+
+    ensure_key_exists(keyname, value) {
+        return new Promise((res, rej) => {
+            return this.db.do_query(`INSERT INTO ${this.name} (${keyname}) VALUES ($1);`, [value])
+            .then((r) => {
+                Log.important(1, "Database >> Create key " + keyname);
+                res(r);
+            })
+            .catch((err) => {
+                if (err.code != "23505") { // remove error if already created
+                    Log.error(1, "Database >>", err);
+                    return rej(err);
+                }
+                return res();
+            });
+        });
+    }
+
+    get_role_info(server_id) {
+        return this.db.do_query(`SELECT role_info FROM servers WHERE server_id = $1;`, [server_id])
+    }
+
+    update_role_info(server_id, role_info) {
+        this.db.do_query(`UPDATE ${this.name} SET role_info=$1::text WHERE server_id=$2;`, [JSON.stringify(role_info), server_id]);
+    }
+}
+
 class RegisterTable {
     constructor(name, db) {
         this.name = name;
@@ -96,6 +137,10 @@ class Database {
 
     get_register_table(server_id) {
         return new RegisterTable(`register_${server_id}`, this);
+    }
+
+    get_servers_table(server_id) {
+        return new ServersTable(this);
     }
 
     ensure_table_exists(table, variables) {
