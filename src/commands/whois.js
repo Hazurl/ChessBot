@@ -8,7 +8,7 @@ var whois = new Command(["whois", "w"])
 .set_examples(["whois Hazurl\t(Search discord account linked to the lichess account 'Hazurl')", "whois @Hazurl\t(Search lichess account linked to 'Hazurl')"])
 .on_execution((msg, args) => {
     if (args.length <= 0) {
-        return whois.send_error("Not enough arguments", "whois require a username in parameter");
+        return whois.send_error("Not enough arguments", "whois requires a username in parameter");
     }
     
     const server = msg.guild;
@@ -28,10 +28,12 @@ var whois = new Command(["whois", "w"])
         .then((res) => {
             if (res.rows.length > 0) {
                 const lichess_account = res.rows[0].lichess;
-                return whois.send_response(`Who is ${username}`, `<@${id}> is linked to [${lichess_account}](https://lichess.org/@/${lichess_account})`)
+                whois.send_response(`Who is ${username}`, `<@${id}> is linked to [${lichess_account}](https://lichess.org/@/${lichess_account})`)
+                return lichess_account;
             }
 
-            return whois.send_error(`${username} not found`, `Sorry <@${id}> has no lichess account register`);
+            whois.send_error(`${username} not found`, `Sorry <@${id}> has no lichess account register`);
+            return false;
         })
         .catch((err) => {
             whois.send_error("Database Error", `An internal error occurs`);            
