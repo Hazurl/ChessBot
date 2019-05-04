@@ -40,8 +40,34 @@ class ServersTable {
         return this.db.do_query(`SELECT role_info FROM servers WHERE server_id = $1;`, [server_id])
     }
 
+    remove_role(server_id, id) {
+        return this.get_role_info(server_id).then((res) => {
+            var roles = JSON.parse(res.rows[0].role_info);
+            var change = false;
+            for (var i = 0; i < roles.length; i++) {
+                if (roles[i].role_id === id) {
+                    roles.splice(i, i+1);
+                    change = true;
+                }
+            }
+            if (change) {
+                return this.update_role_info(server_id, roles).then(() => {
+                    Log.important(1, `Database >> Removed role (${id}) from server (${server_id})`);
+                    return true;
+                }).catch(() => {
+                    Log.error(1, `Database >> Could not remove role (${id}) from server (${server_id}) (1)`);
+                    return false;
+                });
+            }
+            return false;
+        }).catch(() => {
+            Log.error(1, `Database >> Could not remove role (${id}) from server (${server_id}) (2)`);
+            return false;
+        });
+    }
+
     update_role_info(server_id, role_info) {
-        this.db.do_query(`UPDATE ${this.name} SET role_info=$1::text WHERE server_id=$2;`, [JSON.stringify(role_info), server_id]);
+        return this.db.do_query(`UPDATE ${this.name} SET role_info=$1::text WHERE server_id=$2;`, [JSON.stringify(role_info), server_id]);
     }
 }
 

@@ -45,7 +45,7 @@ var unregister = new Command(["unregister"])
         const is_mention = arg[0] == '<' && arg[1] == '@' && arg[arg.length-1] == '>'; 
         const is_id = !isNaN(arg) || is_mention;
 
-        id = is_mention ? arg.substring(2, arg.length-1) : arg;
+        id = is_mention ? arg.replace(/<|@|!|>/g, "") : arg;
 
         if (!author.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR))
             return unregister.send_error("Administrator only", "This command can only be executed by administrator");

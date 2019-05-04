@@ -43,10 +43,10 @@ var rating = new Command(["rating", "r"])
         var fclassical = [];
         var fvariant = [];
 
-        for (var category of categories_classical)
+        for(var category of categories_classical)
             fclassical.push([category[0], get_rating(user['perfs'], category), true]);
 
-        for (var category of categories_variants)
+        for(var category of categories_variants)
             fvariant.push([category[0], get_rating(user['perfs'], category), true]);
 
         rating.send_response(`${user['username']}'s rating on classical`, '', fclassical);

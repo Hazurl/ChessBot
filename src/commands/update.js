@@ -12,6 +12,7 @@ const request = require('../util/request.js');
 
 function do_update(command, member, server_id) {
     const serversTable = db.get_servers_table();
+    var guild = client.guilds.get(server_id);
     Log.info(1, `Updating role for user: ${member.id}`);
 
     new Promise((res, rej) =>
@@ -29,15 +30,19 @@ function do_update(command, member, server_id) {
                     return;
                 }
                 var role_id;
-                whois.execute({guild: client.guilds.get(server_id), channel:{send:function(){}}}, [`<@${member.id}>`], bot.db, {}).then((lichess) => {
-                    if (!lichess) return;
+                whois.execute({guild: guild, channel:{send:function(){}}}, [`<@${member.id}>`], bot.db, {}).then((lichess) => {
+                    if (!lichess) {
+                        Log.error(1, "Update >> Could not fetch lichess username.");
+                        command.send_error("An unknown error has occurred.", "Have you registered your account?");
+                        return false;
+                    }
                     request.user(lichess).then((user) => {
                         var elo;
                         if (user && user['perfs'] && user['perfs']['blitz'] && user['perfs']['blitz']['rating'])
                             elo = parseInt(user['perfs']['blitz']['rating']);
                         else
                             elo = -1;
-                        for (var i = 0; i < role_info.length; i++) {
+                        for (var i = role_info.length-1; i >= 0; i--) {
                             let role = role_info[i];
                             if (role.from <= elo && role.to >= elo) {
                                 role_id = role.role_id;
@@ -52,14 +57,27 @@ function do_update(command, member, server_id) {
                         }
                         if (!role_id) {
                             Log.error(1, "Role >> No role applicable.");
+			    command.send_response("Update completed.", "Success");
                             return;
                         } else {
                             member.addRole(role_id).then(() => {
                                 Log.error(1, "Role >> Role given (update)");
+				command.send_response("Update completed.", "Success");
                             }).catch((e) => {
-                                Log.error(1, "Role >> No permissions");
-                                command.send_error("Hmm..", "I don't have the necessary permissions.");
-                                return;
+                                if (guild.roles.get(role_id)) {
+                                    Log.error(1, "Role >> No permissions");
+                                    command.send_error("Hmm..", "I don't have the necessary permissions.");
+                                } else {
+                                    Log.error(1, "Role >> Doesn't exist (removing from db)");
+                                    serversTable.remove_role(server_id, role_id).then((res) => {
+                                        if (res) do_update(command, member, server_id); // call again after removing role
+                                        else command.send_error("There was a problem removing a role from the database.", "Oops");
+                                    }).catch(() => {
+                                        command.send_error("There was a fatal error!", "This bot is shutting down.. please contact the developer.");
+                                        process.exit(100);
+                                    });
+                                }
+                                return false;
                             });
                         }
                     });
