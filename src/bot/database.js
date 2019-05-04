@@ -4,6 +4,73 @@ const Log = require("./../util/Logger.js");
 const bot = require("./bot.js").bot;
 const { dev_mode_enable } = require("../util/Config.js");
 
+class ServersTable {
+    constructor(db) {
+        this.name = "servers";
+        this.db = db;
+    }
+
+    ensure_exists() {
+        return this.db.ensure_table_exists(this.name, [
+            "server_id BIGINT UNIQUE",
+            "role_info TEXT",
+            "PRIMARY KEY(server_id)",
+            "UNIQUE(server_id)"
+        ]);
+    }
+
+    ensure_key_exists(keyname, value) {
+        return new Promise((res, rej) => {
+            return this.db.do_query(`INSERT INTO ${this.name} (${keyname}) VALUES ($1);`, [value])
+            .then((r) => {
+                Log.important(1, "Database >> Create key " + keyname);
+                res(r);
+            })
+            .catch((err) => {
+                if (err.code != "23505") { // remove error if already created
+                    Log.error(1, "Database >>", err);
+                    return rej(err);
+                }
+                return res();
+            });
+        });
+    }
+
+    get_role_info(server_id) {
+        return this.db.do_query(`SELECT role_info FROM servers WHERE server_id = $1;`, [server_id])
+    }
+
+    remove_role(server_id, id) {
+        return this.get_role_info(server_id).then((res) => {
+            var roles = JSON.parse(res.rows[0].role_info);
+            var change = false;
+            for (var i = 0; i < roles.length; i++) {
+                if (roles[i].role_id === id) {
+                    roles.splice(i, i+1);
+                    change = true;
+                }
+            }
+            if (change) {
+                return this.update_role_info(server_id, roles).then(() => {
+                    Log.important(1, `Database >> Removed role (${id}) from server (${server_id})`);
+                    return true;
+                }).catch(() => {
+                    Log.error(1, `Database >> Could not remove role (${id}) from server (${server_id}) (1)`);
+                    return false;
+                });
+            }
+            return false;
+        }).catch(() => {
+            Log.error(1, `Database >> Could not remove role (${id}) from server (${server_id}) (2)`);
+            return false;
+        });
+    }
+
+    update_role_info(server_id, role_info) {
+        return this.db.do_query(`UPDATE ${this.name} SET role_info=$1::text WHERE server_id=$2;`, [JSON.stringify(role_info), server_id]);
+    }
+}
+
 class RegisterTable {
     constructor(name, db) {
         this.name = name;
@@ -96,6 +163,10 @@ class Database {
 
     get_register_table(server_id) {
         return new RegisterTable(`register_${server_id}`, this);
+    }
+
+    get_servers_table(server_id) {
+        return new ServersTable(this);
     }
 
     ensure_table_exists(table, variables) {

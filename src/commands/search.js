@@ -29,7 +29,7 @@ var search = new Command(["search", "s"])
         if (user['closed'])
             search.send_error(`Player ${status['name']} found`, 'Closed account');
         else if (user['engine'])
-            search.send_warning(`Playing ${status['name']} found`, `${desc}\nThis player is flagged for using computer assistance`);
+            search.send_warning(`Player ${status['name']} found`, `${desc}\nThis player is flagged for using computer assistance`);
         else
             search.send_response(`Player ${status['name']} found`, desc);
     }).catch((err) => {

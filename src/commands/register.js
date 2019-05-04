@@ -73,7 +73,7 @@ var register = new Command(["register"])
         const is_mention = arg[0] == '<' && arg[1] == '@' && arg[arg.length-1] == '>'; 
         const is_id = !isNaN(arg) || is_mention;
     
-        discord = is_mention ? arg.substring(2, arg.length-1) : arg;
+        discord = is_mention ? arg.replace(/<|@|!|>/g, "") : arg;
         lichess = args[1];
 
         if (!author.hasPermission(Discord.Permissions.FLAGS.ADMINISTRATOR))

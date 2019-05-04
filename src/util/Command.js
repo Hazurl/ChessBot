@@ -33,7 +33,7 @@ class Command {
         this.current_execution = {
             msg, args, db, app_info
         };
-        this.execution(msg, args, db, app_info);
+        return this.execution(msg, args, db, app_info);
     }
 
     hide(b) {

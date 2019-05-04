@@ -18,17 +18,17 @@ var whois = new Command(["whois", "w"])
     const is_mention = arg[0] == '<' && arg[1] == '@' && arg[arg.length-1] == '>'; 
     const is_id = !isNaN(arg) || is_mention;
 
-    const id = is_mention ? arg.substring(2, arg.length-1) : arg;
+    const id = is_mention ? arg.replace(/<|@|!|>/g, "") : arg;
 
     if (is_id) {
         const username = server.members.get(id).user.username;
-
         return table.ensure_exists()
         .then(() => table.get_lichess_of(id))
         .then((res) => {
             if (res.rows.length > 0) {
                 const lichess_account = res.rows[0].lichess;
-                return whois.send_response(`Who is ${username}`, `<@${id}> is linked to [${lichess_account}](https://lichess.org/@/${lichess_account})`)
+                whois.send_response(`Who is ${username}`, `<@${id}> is linked to [${lichess_account}](https://lichess.org/@/${lichess_account})`)
+                return lichess_account;
             }
 
             return whois.send_error(`${username} not found`, `Sorry <@${id}> has no lichess account register`);
